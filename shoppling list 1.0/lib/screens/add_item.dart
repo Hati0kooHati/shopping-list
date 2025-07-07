@@ -1,23 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shopping_list_app/data/categories.dart';
 import 'package:shopping_list_app/models/category.dart';
+import 'package:shopping_list_app/models/grocery_item.dart';
+import 'package:shopping_list_app/providers/grocery_item.dart';
 
-class AddItemScreen extends StatefulWidget {
+class AddItemScreen extends ConsumerStatefulWidget {
   const AddItemScreen({super.key});
 
   @override
-  State<AddItemScreen> createState() => _AddItemScreenState();
+  ConsumerState<AddItemScreen> createState() => _AddItemScreenState();
 }
 
-class _AddItemScreenState extends State<AddItemScreen> {
+class _AddItemScreenState extends ConsumerState<AddItemScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String enteredName = "";
+  int enteredQuantity = 1;
+  Category selectedCategory = categories[Categories.vegetables]!;
 
   void resetItem() {
     _formKey.currentState!.reset();
   }
 
   void saveItem() {
-    _formKey.currentState!.validate();
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      ref
+          .read(groceryItemProvider.notifier)
+          .addItem(
+            GroceryItem(
+              id: DateTime.now().toString(),
+              name: enteredName,
+              quantity: enteredQuantity,
+              category: selectedCategory,
+            ),
+          );
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -40,6 +59,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   }
                   return null;
                 },
+
+                onSaved: (newName) => enteredName = newName!,
               ),
 
               Row(
@@ -64,11 +85,15 @@ class _AddItemScreenState extends State<AddItemScreen> {
                         }
                         return null;
                       },
+
+                      onSaved: (newQuantity) =>
+                          enteredQuantity = int.parse(newQuantity!),
                     ),
                   ),
                   const SizedBox(width: 20),
                   Expanded(
                     child: DropdownButtonFormField(
+                      value: selectedCategory,
                       items: [
                         for (MapEntry<Categories, Category> category
                             in categories.entries)
@@ -87,7 +112,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
                             ),
                           ),
                       ],
-                      onChanged: (value) {},
+                      onChanged: (newCategory) =>
+                          selectedCategory = newCategory as Category,
                     ),
                   ),
                 ],
