@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:shopping_list_app/data/categories.dart';
-import 'package:shopping_list_app/data/dummy_items.dart';
-import 'package:shopping_list_app/models/category.dart';
 import 'dart:convert';
 
 import 'package:shopping_list_app/models/grocery_item.dart';
