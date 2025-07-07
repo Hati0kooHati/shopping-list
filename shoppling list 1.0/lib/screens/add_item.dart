@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:shopping_list_app/data/categories.dart';
 import 'package:shopping_list_app/models/category.dart';
 import 'package:shopping_list_app/models/grocery_item.dart';
@@ -22,9 +26,26 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
     _formKey.currentState!.reset();
   }
 
-  void saveItem() {
+  void saveItem() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+
+      final Uri uri = Uri.https(
+        "shopping-list-d9af2-default-rtdb.firebaseio.com",
+        "shopping-list.json",
+      );
+
+      final response = await http.post(
+        uri,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
+          "id": DateTime.now().toString(),
+          "name": enteredName,
+          "quantity": enteredQuantity,
+          "category": selectedCategory.category,
+        }),
+      );
+
       ref
           .read(groceryItemProvider.notifier)
           .addItem(
@@ -35,7 +56,10 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
               category: selectedCategory,
             ),
           );
-      Navigator.pop(context);
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 
